@@ -1,0 +1,68 @@
+/* Keep Paperlogy at readable sizes without scaling or rasterizing the page. */
+body{font-size:16px;line-height:1.65;text-rendering:auto}
+h1,h2,h3{letter-spacing:-.02em}
+p{font-size:16px}
+button,.button,input,select,textarea{font-size:16px}
+.workspace-shell .app-sidebar nav a{font-size:15px}
+.workspace-shell .workspace-breadcrumb,.workspace-shell .workspace-local,.workspace-shell .quiet-link{font-size:13px}
+.workspace-shell .studio-dashboard h1{font-size:36px;letter-spacing:-.02em}
+.workspace-shell .setup-intro h2,.workspace-shell .studio-venue .panel-heading h2{font-size:21px}
+.workspace-shell .setup-steps b,.workspace-shell .field-title,.workspace-shell .category-tabs button,.workspace-shell .field-section select{font-size:15px}
+.workspace-shell .provider-logo{font-size:17px;letter-spacing:0}
+.workspace-shell .provider-options small,.workspace-shell .difficulty-options small,.workspace-shell .mode-options small{font-size:13px;line-height:1.7;letter-spacing:0}
+.workspace-shell .difficulty-options b,.workspace-shell .mode-options b,.workspace-shell .setup-actions .primary{font-size:15px}
+.workspace-shell .setup-review b,.workspace-shell .setup-review small,.workspace-shell .setup-review button,.workspace-shell .setup-actions .text-button{font-size:13px}
+.workspace-shell .target-section,.workspace-shell .target-section strong,.workspace-shell .target-kind,.workspace-shell .studio-venue>p,.workspace-shell .studio-venue .panel-heading>span{font-size:13px}
+.workspace-shell .last-practice .section-heading h2,.workspace-shell .last-practice>p,.workspace-shell .empty-history{font-size:15px}
+.workspace-shell .last-practice .section-heading a,.workspace-shell .last-practice .inline,.workspace-shell .empty-history>span{font-size:13px}
+.workspace-shell .brand-copy small,.workspace-shell .sidebar-section-label{font-size:12px}
+.workspace-shell .sidebar-bottom,.workspace-shell .sidebar-bottom small{font-size:12px;white-space:normal}
+.app .booking-top p,.app .facts,.app .notice,.app .small,.app .form-panel>p,.app .order-summary>p,.app .order-summary ul,.app .agreement,.app .feedback p{font-size:14px}
+.app .booking-top .eyebrow,.app .time-left small,.app .radio-option small,.app .ticket-lines span,.app .result-metrics small{font-size:13px}
+.app .stepper li,.app .form-actions button,.app .area-list>button,.app .area-filters select,.app .search-field input,.app .mobile-seat-tabs button{font-size:14px}
+.app .selection-summary .panel-heading h2{font-size:17px}
+.app .selection-summary li,.app .selection-summary .empty p,.app .seat-hover-detail,.app .seat-legend,.app .seat-zoom{font-size:13px}
+.app .seat-hover-detail{height:auto;min-height:40px}
+.app .row-number,.app .stage-direction{font-size:12px}
+.baseball-diagram .map-tools,.baseball-diagram .map-attribution,.seat-photo-disclosure figcaption{font-size:12px;line-height:1.7}
+.baseball-diagram .baseball-map-key,.seat-photo-disclosure>button{font-size:14px}
+.content-page table,.content-page th,.content-page td small{font-size:14px}
+.content-page .guide-list li,.content-page p{font-size:16px}
+@media(min-width:1101px){
+ .workspace-shell{grid-template-columns:232px minmax(0,1fr);transition:grid-template-columns .32s cubic-bezier(.22,1,.36,1)}
+ .workspace-shell.sidebar-collapsed{grid-template-columns:78px minmax(0,1fr)}
+ .app-sidebar{transition:padding .32s cubic-bezier(.22,1,.36,1)}
+ .app-sidebar .brand-copy,.app-sidebar nav a>span,.app-sidebar nav a>i,.app-sidebar .sidebar-section-label,.app-sidebar .sidebar-bottom{opacity:1;transition:opacity .2s ease,max-width .32s cubic-bezier(.22,1,.36,1);max-width:200px;overflow:hidden}
+ .sidebar-collapsed .brand-copy,.sidebar-collapsed nav a>span,.sidebar-collapsed nav a>i{display:block;max-width:0;opacity:0;pointer-events:none}
+ .sidebar-collapsed .sidebar-section-label{display:block;opacity:0;pointer-events:none}
+ .sidebar-collapsed .sidebar-bottom{display:flex;opacity:0;pointer-events:none}
+ .app-sidebar nav a,.sidebar-brand{transition:padding .32s ease,gap .32s ease,background-color .16s,color .16s}
+ .sidebar-collapsed nav a{justify-content:flex-start;gap:0}
+ .sidebar-collapsed .sidebar-brand{gap:0}
+}
+@media(max-width:1000px){
+ .workspace-shell .provider-options{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:760px){
+ .workspace-shell .app-sidebar nav{gap:2px;margin:0}
+ .workspace-shell .app-sidebar nav a{font-size:13px;flex-direction:column;gap:4px;min-width:0;padding:10px 2px}
+ .workspace-shell .app-sidebar nav a:nth-child(3) span{max-width:none}
+ .workspace-shell .studio-dashboard h1{font-size:30px}
+ .workspace-shell .workspace-local{display:none}
+ .workspace-shell .provider-options{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .workspace-shell .difficulty-options,.workspace-shell .mode-options{grid-template-columns:1fr}
+ .workspace-shell .difficulty-options label{padding:16px}
+ .workspace-shell .setup-steps{gap:12px;padding-inline:18px}
+ .workspace-shell .setup-steps b{font-size:14px}
+ .app .booking-top h1{font-size:25px}
+ .app .stepper{flex-wrap:wrap;row-gap:10px}
+ .app .stepper li{font-size:12px}
+ .app .selection-summary{column-gap:12px}
+ .app .selection-summary>.primary{min-width:130px;font-size:14px}
+ .baseball-map-key,.target-section{flex-wrap:wrap}
+}
+@media(prefers-reduced-motion:reduce){
+ .workspace-shell,.workspace-shell .app-sidebar,.app-sidebar .brand-copy,.app-sidebar nav a,.app-sidebar nav a>span,.app-sidebar nav a>i,.app-sidebar .sidebar-section-label,.app-sidebar .sidebar-bottom,.sidebar-brand{transition:none!important}
+ /* Keep the explicitly requested sidebar feedback short, without sliding text. */
+ .app-sidebar .brand-copy,.app-sidebar nav a>span,.app-sidebar .sidebar-section-label{transition:opacity .15s ease!important}
+}

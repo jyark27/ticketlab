@@ -1,0 +1,14 @@
+node_modules/
+dist/
+.sites/
+.openai/local/
+*.tsbuildinfo
+*.log
+artifacts/
+
+.research/
+.netlify/
+.env
+.env.*
+!.env.example
+

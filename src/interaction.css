@@ -1,0 +1,46 @@
+@font-face{font-family:Paperlogy;src:url('/fonts/paperlogy/Paperlogy-4Regular.woff2') format('woff2');font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:Paperlogy;src:url('/fonts/paperlogy/Paperlogy-5Medium.woff2') format('woff2');font-weight:500;font-style:normal;font-display:swap}
+@font-face{font-family:Paperlogy;src:url('/fonts/paperlogy/Paperlogy-6SemiBold.woff2') format('woff2');font-weight:600;font-style:normal;font-display:swap}
+@font-face{font-family:Paperlogy;src:url('/fonts/paperlogy/Paperlogy-7Bold.woff2') format('woff2');font-weight:700;font-style:normal;font-display:swap}
+@font-face{font-family:Paperlogy;src:url('/fonts/paperlogy/Paperlogy-8ExtraBold.woff2') format('woff2');font-weight:800;font-style:normal;font-display:swap}
+:root{font-family:Paperlogy,"Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;font-synthesis:none;font-weight:400;text-rendering:optimizeLegibility}
+body{line-height:1.6;word-break:keep-all;overflow-wrap:anywhere}
+button,input,select,textarea{font-family:inherit}
+button,.button{line-height:1.5}
+h1,h2,h3{line-height:1.45;letter-spacing:-.035em}
+.studio-dashboard h1{font-weight:700;letter-spacing:-.04em}
+.wordmark,.brand-copy{letter-spacing:-.055em;line-height:1.2}
+.brand-copy small{letter-spacing:0;line-height:1.5}
+.provider-logo{font-weight:700;letter-spacing:-.045em;white-space:nowrap}
+.studio-setup .provider-options small{font-size:11px;line-height:1.6;letter-spacing:-.015em}
+.studio-setup .difficulty-options b{line-height:1.7}
+.studio-setup .difficulty-options small,.studio-setup .mode-options small{line-height:1.8}
+.setup-steps b,.field-title{line-height:1.6}
+.workspace-breadcrumb,.setup-actions,.queue-number,.opening-clock,.time-left,.result-metrics{font-variant-numeric:tabular-nums}
+.venue-diagram text{letter-spacing:0;overflow-wrap:normal;word-break:normal}
+button,.button,.mode-options label,.difficulty-options label{transition:background-color .16s ease,border-color .16s ease,color .16s ease,box-shadow .16s ease,transform .16s ease}
+button>svg,.button>svg,.security-shortcut svg,.app-sidebar nav a>svg{transition:transform .18s ease,opacity .18s ease}
+button:focus-visible,.button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible,summary:focus-visible{outline:2px solid var(--review-mid,#3F72AF);outline-offset:4px;box-shadow:0 0 0 4px color-mix(in srgb,var(--review-soft,#DBE2EF) 60%,transparent)}
+.mode-options label:has(input:focus-visible),.difficulty-options label:has(input:focus-visible){outline:2px solid var(--review-mid,#3F72AF);outline-offset:3px}
+button:disabled{transform:none!important;box-shadow:none!important}
+.studio-setup .provider-options button,.practice-presets button{min-width:0}
+html[data-palette] .studio-setup .provider-options button.active,html[data-palette] .studio-setup .difficulty-options label.active,html[data-palette] .studio-setup .mode-options label.active{box-shadow:inset 0 0 0 1px var(--review-mid)}
+@media(hover:hover) and (pointer:fine){
+ button:not(:disabled):not(.seat):hover,.button:hover{border-color:var(--review-mid,#3F72AF)}
+ html[data-palette] .setup-actions .primary:hover,.primary:hover:not(:disabled){background:var(--review-dark,#112D4E);border-color:var(--review-dark,#112D4E);filter:brightness(1.17);box-shadow:0 5px 13px #112d4e24;transform:translateY(-2px)}
+ .primary:hover:not(:disabled)>svg,.security-shortcut:hover>span:last-child svg{transform:translateX(3px)}
+ html[data-palette] .studio-setup .provider-options button:hover{background:color-mix(in srgb,var(--review-soft) 45%,white);border-color:var(--review-mid);box-shadow:0 3px 8px #112d4e14;transform:translateY(-2px)}
+ html[data-palette] .studio-setup .difficulty-options label:hover,html[data-palette] .studio-setup .mode-options label:hover{border-color:var(--review-mid);background:color-mix(in srgb,var(--review-soft) 35%,white);box-shadow:0 3px 8px #112d4e0d}
+ html[data-palette] .practice-presets button:hover{background:var(--review-soft);border-color:var(--review-mid);transform:translateY(-1px)}
+ .app-sidebar nav a:hover>svg{transform:translateX(2px)}
+ .quiet-link:hover,.section-heading a:hover{color:var(--review-dark,#112D4E);text-decoration:underline;text-underline-offset:4px}
+ html[data-palette] .security-shortcut:hover{border-color:var(--review-mid);box-shadow:0 4px 12px #112d4e12;background:var(--review-soft)}
+ .area-list>button:hover:not(:disabled){background:var(--tint);box-shadow:inset 3px 0 0 var(--primary)}
+ .diagram-zone:not(.is-empty):hover path{opacity:.88;stroke:#112D4E;stroke-width:3;filter:drop-shadow(0 1px 1px #112d4e28)}
+ .nol-seat-workspace .seat:hover:not(:disabled){box-shadow:0 0 0 2px #71369a30;transform:none}
+ .text-button:hover:not(:disabled){background:var(--tint);color:var(--primary)}
+}
+button:active:not(:disabled):not(.seat),.button:active{transform:translateY(1px)!important;box-shadow:inset 0 1px 3px #112d4e20}
+.seat:active:not(:disabled){transform:none}
+@media(max-width:760px){.studio-setup .provider-options button{padding-inline:2px}.provider-logo{font-size:13px}.studio-setup .provider-options small{font-size:10px}.app-sidebar nav a{line-height:1.6}.setup-actions .primary{min-height:44px}}
+@media(prefers-reduced-motion:reduce){button,.button,button>svg,.button>svg,.security-shortcut svg,.app-sidebar nav a>svg,.mode-options label,.difficulty-options label{transition:none!important;transform:none!important}}

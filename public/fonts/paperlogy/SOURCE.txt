@@ -1,0 +1,5 @@
+Paperlogy by The PAPERLOGY Authors (Lee Juim / PTN).
+Official distribution: https://freesentation.blog/paperlogyfont
+WOFF2 source: https://github.com/fonts-archive/Paperlogy
+License: SIL Open Font License 1.1; see OFL-license.txt.
+Files are included without modifying font data.
