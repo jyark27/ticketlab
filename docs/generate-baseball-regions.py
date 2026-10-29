@@ -3,7 +3,7 @@ from pathlib import Path
 from collections import defaultdict
 import json
 import numpy as np
-from PIL import Image, ImageFilter
+from PIL import Image
 
 root = Path(__file__).resolve().parents[1]
 
@@ -20,68 +20,38 @@ def hull(points):
     return lower[:-1]+upper[:-1]
 
 
-def simplify(points, tolerance=0.85):
-    if len(points)<3: return points
-    a,b=np.array(points[0],dtype=float),np.array(points[-1],dtype=float)
-    delta=b-a
-    distances=[abs(delta[0]*(p[1]-a[1])-delta[1]*(p[0]-a[0]))/max(np.linalg.norm(delta),1) for p in points]
-    index=int(np.argmax(distances))
-    if distances[index]<=tolerance: return [points[0],points[-1]]
-    return simplify(points[:index+1],tolerance)[:-1]+simplify(points[index:],tolerance)
-
-def outline(mask):
-    """Trace outer pixel boundaries, keeping the concave seating bowl intact."""
-    edges = {}
-    for y,x in zip(*np.where(mask)):
-        for adjacent,a,b in (
-            ((y-1,x),(x,y),(x+1,y)),
-            ((y,x+1),(x+1,y),(x+1,y+1)),
-            ((y+1,x),(x+1,y+1),(x,y+1)),
-            ((y,x-1),(x,y+1),(x,y))):
-            yy,xx=adjacent
-            if yy<0 or xx<0 or yy>=mask.shape[0] or xx>=mask.shape[1] or not mask[yy,xx]:
-                edges.setdefault(a,[]).append(b)
-    paths=[]
-    while edges:
-        start=next(iter(edges)); point=start; ring=[]
-        while True:
-            ring.append(point)
-            candidates=edges[point]; nxt=candidates.pop()
-            if not candidates: del edges[point]
-            point=nxt
-            if point==start: break
-        area=sum(a[0]*b[1]-b[0]*a[1] for a,b in zip(ring,ring[1:]+ring[:1]))/2
-        # Clockwise exteriors only: discard text holes and isolated color noise.
-        if area<30: continue
-        ring=[p for i,p in enumerate(ring) if
-              (p[0]-ring[i-1][0],p[1]-ring[i-1][1]) !=
-              (ring[(i+1)%len(ring)][0]-p[0],ring[(i+1)%len(ring)][1]-p[1])]
-        pivot=max(range(len(ring)),key=lambda i:(ring[i][0]-ring[0][0])**2+(ring[i][1]-ring[0][1])**2)
-        ring=simplify(ring[:pivot+1])[:-1]+simplify(ring[pivot:]+ring[:1])[:-1]
-        paths.append('M'+' L'.join(f'{x},{y}' for x,y in ring)+' Z')
-    return paths
-
 def gocheok_regions(arr,palette):
-    height,width=arr.shape[:2]; masks={}
+    """One convex polygon per printed block; never close aisles across blocks."""
+    anchors=json.loads((root/'docs/gocheok-block-labels.json').read_text())
+    height,width=arr.shape[:2]; masks={}; zones=defaultdict(list); blocks=[]
     for color,group in palette:
         mask=np.max(np.abs(arr-np.array(color)),axis=2)<26
         mask[:38]=False; mask[510:]=False
         if group=='L3': mask[:300]=False; mask[470:]=False
         if group=='T2': mask[430:]=False
         masks[group]=masks.get(group,np.zeros((height,width),dtype=bool))|mask
-    zones={}
     for group,mask in masks.items():
-        # Close letter-sized gaps before tracing. Never use a convex hull on
-        # connected tiers: it would cover the field and neighbouring grades.
-        closed=np.array(Image.fromarray(mask.astype('uint8')*255)
-                        .filter(ImageFilter.MaxFilter(7))
-                        .filter(ImageFilter.MinFilter(7)))>0
-        if group in ('OF','BG','DB'):
-            left=closed.copy();left[:,width//2:]=False
-            right=closed.copy();right[:,:width//2]=False
-            zones[group+'3']=outline(left); zones[group+'1']=outline(right)
-        else: zones[group]=outline(closed)
-    return zones
+        labels=anchors[group]; assigned=[[] for _ in labels]
+        ys,xs=np.where(mask); remaining=set((ys*width+xs).tolist())
+        while remaining:
+            todo=[remaining.pop()]; points=[]
+            while todo:
+                p=todo.pop(); y,x=divmod(p,width); points.append((x,y))
+                for xx,yy in ((x-1,y),(x+1,y),(x,y-1),(x,y+1)):
+                    q=yy*width+xx
+                    if 0<=xx<width and 0<=yy<height and q in remaining:
+                        remaining.remove(q); todo.append(q)
+            cx=sum(p[0] for p in points)/len(points); cy=sum(p[1] for p in points)/len(points)
+            i=min(range(len(labels)),key=lambda i:(labels[i][1]-cx)**2+(labels[i][2]-cy)**2)
+            if (labels[i][1]-cx)**2+(labels[i][2]-cy)**2>24**2: continue
+            assigned[i].extend(points)
+        for (label,x,y),points in zip(labels,assigned):
+            if len(points)<8: raise ValueError(f'Missing block {group} {label}')
+            section=group+('1' if x>width/2 else '3') if group in ('OF','BG','DB') else group
+            d='M'+' L'.join(f'{x},{y}' for x,y in hull(points))+' Z'
+            zones[section].append(d)
+            blocks.append({'id':group+'-'+str(label),'label':str(label),'section':section,'d':d})
+    return zones,blocks
 
 result = {}
 palettes = {
@@ -93,8 +63,8 @@ for name,palette in palettes.items():
     height,width=arr.shape[:2]
     zones=defaultdict(list)
     if name=="gocheok":
-        zones=gocheok_regions(arr,palette)
-        result[name]={"width":width,"height":height,"paths":{key:" ".join(paths) for key,paths in zones.items()}}
+        zones,blocks=gocheok_regions(arr,palette)
+        result[name]={"width":width,"height":height,"blocks":blocks,"paths":{key:" ".join(paths) for key,paths in zones.items()}}
         print(name, {key:len(paths) for key,paths in zones.items()})
         continue
     block408=[]
