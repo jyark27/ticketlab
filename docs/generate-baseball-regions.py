@@ -3,7 +3,7 @@ from pathlib import Path
 from collections import defaultdict
 import json
 import numpy as np
-from PIL import Image
+from PIL import Image, ImageFilter
 
 root = Path(__file__).resolve().parents[1]
 
@@ -19,6 +19,70 @@ def hull(points):
         upper.append(p)
     return lower[:-1]+upper[:-1]
 
+
+def simplify(points, tolerance=0.85):
+    if len(points)<3: return points
+    a,b=np.array(points[0],dtype=float),np.array(points[-1],dtype=float)
+    delta=b-a
+    distances=[abs(delta[0]*(p[1]-a[1])-delta[1]*(p[0]-a[0]))/max(np.linalg.norm(delta),1) for p in points]
+    index=int(np.argmax(distances))
+    if distances[index]<=tolerance: return [points[0],points[-1]]
+    return simplify(points[:index+1],tolerance)[:-1]+simplify(points[index:],tolerance)
+
+def outline(mask):
+    """Trace outer pixel boundaries, keeping the concave seating bowl intact."""
+    edges = {}
+    for y,x in zip(*np.where(mask)):
+        for adjacent,a,b in (
+            ((y-1,x),(x,y),(x+1,y)),
+            ((y,x+1),(x+1,y),(x+1,y+1)),
+            ((y+1,x),(x+1,y+1),(x,y+1)),
+            ((y,x-1),(x,y+1),(x,y))):
+            yy,xx=adjacent
+            if yy<0 or xx<0 or yy>=mask.shape[0] or xx>=mask.shape[1] or not mask[yy,xx]:
+                edges.setdefault(a,[]).append(b)
+    paths=[]
+    while edges:
+        start=next(iter(edges)); point=start; ring=[]
+        while True:
+            ring.append(point)
+            candidates=edges[point]; nxt=candidates.pop()
+            if not candidates: del edges[point]
+            point=nxt
+            if point==start: break
+        area=sum(a[0]*b[1]-b[0]*a[1] for a,b in zip(ring,ring[1:]+ring[:1]))/2
+        # Clockwise exteriors only: discard text holes and isolated color noise.
+        if area<30: continue
+        ring=[p for i,p in enumerate(ring) if
+              (p[0]-ring[i-1][0],p[1]-ring[i-1][1]) !=
+              (ring[(i+1)%len(ring)][0]-p[0],ring[(i+1)%len(ring)][1]-p[1])]
+        pivot=max(range(len(ring)),key=lambda i:(ring[i][0]-ring[0][0])**2+(ring[i][1]-ring[0][1])**2)
+        ring=simplify(ring[:pivot+1])[:-1]+simplify(ring[pivot:]+ring[:1])[:-1]
+        paths.append('M'+' L'.join(f'{x},{y}' for x,y in ring)+' Z')
+    return paths
+
+def gocheok_regions(arr,palette):
+    height,width=arr.shape[:2]; masks={}
+    for color,group in palette:
+        mask=np.max(np.abs(arr-np.array(color)),axis=2)<26
+        mask[:38]=False; mask[510:]=False
+        if group=='L3': mask[:300]=False; mask[470:]=False
+        if group=='T2': mask[430:]=False
+        masks[group]=masks.get(group,np.zeros((height,width),dtype=bool))|mask
+    zones={}
+    for group,mask in masks.items():
+        # Close letter-sized gaps before tracing. Never use a convex hull on
+        # connected tiers: it would cover the field and neighbouring grades.
+        closed=np.array(Image.fromarray(mask.astype('uint8')*255)
+                        .filter(ImageFilter.MaxFilter(7))
+                        .filter(ImageFilter.MinFilter(7)))>0
+        if group in ('OF','BG','DB'):
+            left=closed.copy();left[:,width//2:]=False
+            right=closed.copy();right[:,:width//2]=False
+            zones[group+'3']=outline(left); zones[group+'1']=outline(right)
+        else: zones[group]=outline(closed)
+    return zones
+
 result = {}
 palettes = {
  'jamsil': [((36,41,83),'N'),((52,150,0),'OF'),((221,0,42),'R'),((225,105,0),'O'),((70,153,242),'B'),((5,94,221),'C'),((124,0,101),'C')],
@@ -28,6 +92,11 @@ for name,palette in palettes.items():
     arr=np.array(Image.open(root/'public/baseball'/f'{name}-map.png').convert('RGB')).astype(np.int16)
     height,width=arr.shape[:2]
     zones=defaultdict(list)
+    if name=="gocheok":
+        zones=gocheok_regions(arr,palette)
+        result[name]={"width":width,"height":height,"paths":{key:" ".join(paths) for key,paths in zones.items()}}
+        print(name, {key:len(paths) for key,paths in zones.items()})
+        continue
     block408=[]
     for color,group in palette:
         mask=np.max(np.abs(arr-np.array(color)),axis=2)<(5 if name=='jamsil' else 26)

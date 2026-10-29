@@ -18,3 +18,5 @@ NOL/멜론/YES24/티켓링크형 연습, 전체/좌석 집중/보안문자 연�
 ## 배포
 운영 배포 대상은 Netlify의 기존 ticketlab-v 프로젝트다. 앞으로도 https://ticketlab-v.netlify.app/ 에 재배포한다. Sites 배포를 운영 배포로 대체하지 않는다. 검증한 dist 폴더 내용만 ZIP으로 묶어 https://app.netlify.com/projects/ticketlab-v/overview 의 수동 배포로 업로드한다. .research, 소스, 로컬 실행 기록은 배포 ZIP에 포함하지 않는다.
 
+
+작업을 마칠 때마다 변경 사항을 검증한 뒤 기존 Netlify 사이트에 배포하고 https://github.com/jyark27/ticketlab.git 의 main 브랜치에 커밋·푸시한다. 사용자가 별도로 중단을 요청하지 않는 한 두 작업을 모두 완료한다.
