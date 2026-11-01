@@ -13,7 +13,7 @@ import {readRecords,clearRecords,seconds} from './records';
 function sessionDates(){const d=new Date();d.setDate(d.getDate()+((6-d.getDay()+7)%7||7));return [0,1].map(n=>{const day=new Date(d);day.setDate(day.getDate()+n);return day.toLocaleDateString('ko-KR',{year:'numeric',month:'long',day:'numeric',weekday:'short'})+' 18:00';});}
 function Header({page,collapsed,onCollapse}:{page:string;collapsed:boolean;onCollapse:()=>void}){
  const links=[{href:'#',id:'',label:'예매 연습',icon:LayoutGrid},{href:'#records',id:'records',label:'나의 기록',icon:ChartNoAxesCombined},{href:'#security',id:'security',label:'보안문자 연습',icon:Keyboard}];
- return <aside className="app-sidebar"><a className="sidebar-brand" href="#" aria-label="티켓연습실 홈"><span className="brand-icon"><Ticket size={23}/></span><span className="brand-copy">ticket<span>lab</span><small>티켓연습실</small></span></a><button className="collapse-sidebar" onClick={onCollapse} aria-label={collapsed?'메뉴 펼치기':'메뉴 접기'} aria-expanded={!collapsed}>{collapsed?<PanelLeftOpen size={18}/>:<PanelLeftClose size={18}/>}</button><div className="sidebar-section-label">WORKSPACE</div><nav aria-label="주 메뉴">{links.map(({href,id,label,icon:Icon})=><a key={id} href={href} className={page===id?'active':''} aria-current={page===id?'page':undefined} title={collapsed?label:undefined}><Icon size={19}/><span>{label}</span>{page===id&&<i/>}</a>)}</nav><div className="sidebar-bottom"><span className="sidebar-status-dot"/><span>실제 결제 없는 연습 공간<small>기록은 이 브라우저에 저장돼요.</small></span></div></aside>;
+ return <aside className="app-sidebar"><a className="sidebar-brand" href="#" aria-label="티켓연습실 홈"><span className="brand-icon"><Ticket size={23}/></span><span className="brand-copy">ticket<span>lab</span><small>티켓연습실</small></span></a><button className="collapse-sidebar" onClick={onCollapse} aria-label={collapsed?'메뉴 펼치기':'메뉴 접기'} aria-expanded={!collapsed}>{collapsed?<PanelLeftOpen size={18}/>:<PanelLeftClose size={18}/>}</button><nav aria-label="주 메뉴">{links.map(({href,id,label,icon:Icon})=><a key={id} href={href} className={page===id?'active':''} aria-current={page===id?'page':undefined} title={collapsed?label:undefined}><Icon size={19}/><span>{label}</span>{page===id&&<i/>}</a>)}</nav><div className="sidebar-bottom"><span className="sidebar-status-dot"/><span>실제 결제 없는 연습 공간<small>기록은 이 브라우저에 저장돼요.</small></span></div></aside>;
 }
 export default function Root(){
  const {palette,select,review}=usePalettePreview();
@@ -36,7 +36,7 @@ function Dashboard(){
  const actualScenario:Scenario=category==='baseball'?(scenario==='regular'?'regular':'postseason'):'opening';
  function launch(){try{sessionStorage.setItem('ticketlab-setup-v1',JSON.stringify({category,provider,venueId,difficulty,mode,scenario,session,previewSection:target.id}));}catch{}const q=new URLSearchParams({venue:venue.id,provider,difficulty,mode,section:target.id,scenario:actualScenario,session});location.hash=(category==='baseball'?'baseball':provider)+'?'+q.toString();}
  return <main id="main" className="dashboard studio-dashboard">
- <div className="workspace-breadcrumb"><span>연습실</span><ChevronRight size={13}/><b>새 연습</b><span className="workspace-local"><span/>브라우저에 자동 기록</span></div>
+
  <div className="dashboard-title"><div><h1>예매 연습</h1></div></div>
  <div className="dashboard-grid">
  <section ref={setupRef} className="setup-panel studio-setup" aria-label="연습 설정">

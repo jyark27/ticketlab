@@ -2,6 +2,7 @@
 from pathlib import Path
 from collections import defaultdict
 import json
+import re
 import numpy as np
 from PIL import Image
 
@@ -91,10 +92,25 @@ for name,palette in palettes.items():
             if name=='jamsil' and group=='O' and cy<height*.5: continue
             if name=='gocheok' and group=='L3' and cy<300: continue
             section=group+('1' if cx>width/2 else '3') if group in ('N','OF','R','O','B','BG','DB') else group
+            # The source image joins 217/218 with a few blue pixels across the aisle.
+            # Keep the two numbered blocks separate along their shared diagonal.
+            if name=='jamsil' and group=='B' and min(x for x,y in points)<450 and max(y for x,y in points)>1120:
+                for part in ([p for p in points if sum(p)<1580],[p for p in points if sum(p)>=1580]):
+                    zones[section].append('M'+' L'.join(f'{x},{y}' for x,y in hull(part))+' Z')
+                continue
             points=hull(points)
             zones[section].append('M'+' L'.join(f'{x},{y}' for x,y in points)+' Z')
     if block408:
         zones['OF1'].append('M'+' L'.join(f'{x},{y}' for x,y in hull(block408))+' Z')
-    result[name]={'width':width,'height':height,'paths':{key:' '.join(paths) for key,paths in zones.items()}}
+    anchors=json.loads((root/'docs/jamsil-block-labels.json').read_text(encoding='utf-8'))
+    blocks=[]
+    for section,paths in zones.items():
+        for d in paths:
+            coords=list(map(int,re.findall(r'\d+',d))); xs=coords[::2]; ys=coords[1::2]
+            cx=(min(xs)+max(xs))/2; cy=(min(ys)+max(ys))/2
+            label=min(anchors[section],key=lambda a:(a[1]-cx)**2+(a[2]-cy)**2)[0]
+            blocks.append({'id':section+'-'+str(label),'label':str(label),'section':section,'d':d})
+    assert len({b['id'] for b in blocks})==len(blocks), 'Duplicate Jamsil block label'
+    result[name]={'width':width,'height':height,'blocks':blocks,'paths':{key:' '.join(paths) for key,paths in zones.items()}}
     print(name, {key:len(paths) for key,paths in zones.items()})
 (root/'src/baseballRegions.json').write_text(json.dumps(result,separators=(',',':')),encoding='utf-8')
