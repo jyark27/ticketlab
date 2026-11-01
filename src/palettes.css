@@ -12,7 +12,7 @@ html[data-palette] .brand-copy small,html[data-palette] .collapse-sidebar,html[d
 html[data-palette] .app-sidebar nav a{color:var(--review-soft)}
 html[data-palette] .app-sidebar nav a:hover{background:color-mix(in srgb,var(--review-bg) 10%,transparent);color:var(--review-bg)}
 html[data-palette] .app-sidebar nav a.active{background:var(--review-soft);color:var(--review-dark)}
-html[data-palette] .app-sidebar nav a i,html[data-palette] .sidebar-status-dot{background:var(--review-mid)}
+html[data-palette] .app-sidebar nav a i{background:var(--review-mid)}
 html[data-palette] .studio-eyebrow,html[data-palette] .workspace-breadcrumb,html[data-palette] .workspace-breadcrumb b,html[data-palette] .workspace-local,html[data-palette] .quiet-link{color:var(--review-muted)}
 html[data-palette] .workspace-local>span{background:var(--review-mid)}
 html[data-palette] .studio-dashboard .dashboard-title p,html[data-palette] .setup-intro p{color:var(--review-muted)}
@@ -51,7 +51,6 @@ html[data-palette] .studio-dashboard .last-practice{background:var(--review-soft
 html[data-palette] .last-practice .section-heading h2,html[data-palette] .last-practice .section-heading a,html[data-palette] .empty-history,html[data-palette] .empty-history>span{color:var(--review-dark)}
 html[data-palette] .security-shortcut{background:color-mix(in srgb,var(--review-soft) 50%,white);border-color:var(--review-border);color:var(--review-dark)}
 html[data-palette] .security-shortcut p{color:var(--review-muted)}
-html[data-palette] .shortcut-icon{background:var(--review-soft)}
 html[data-palette] .workspace-main .site-footer{border-color:var(--review-border);color:var(--review-muted)}
 .palette-review{display:flex;flex-wrap:wrap;align-items:center;gap:12px;padding:15px 24px;background:#fff;border-bottom:1px solid #dde1e7;color:#303944;font-size:11px}
 .palette-review-title{display:flex;flex-direction:column;gap:4px}.palette-review-title b{font-size:11px}.palette-review-title>span{font-size:9px;color:#7b8390}

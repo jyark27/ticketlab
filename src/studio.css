@@ -3,7 +3,6 @@
 :root{--line:#e4e6e5;--muted:#747b77;background:#f5f6f5;color:#242a27}
 button,.button,input,select{border-radius:9px}
 button,.button,a,input,select{transition:background-color .16s,border-color .16s,color .16s,box-shadow .16s}
-button:active:not(:disabled),.button:active{transform:translateY(1px)}
 .primary{box-shadow:0 2px 3px #153b2210}
 .workspace-shell{display:grid;grid-template-columns:216px minmax(0,1fr);min-height:100vh;transition:grid-template-columns .22s}
 .workspace-main{min-width:0}
@@ -21,7 +20,6 @@ button:active:not(:disabled),.button:active{transform:translateY(1px)}
 .app-sidebar nav a i{width:5px;height:5px;background:#31664b;border-radius:50%;margin-left:auto}
 .sidebar-bottom{margin-top:auto;padding:15px 9px 0;display:flex;gap:8px;font-size:10px;color:#6c776f;white-space:nowrap}
 .sidebar-bottom small{display:block;font-size:9px;color:#9aa29b;margin-top:5px}
-.sidebar-status-dot,.workspace-local>span{background:#638f72;width:5px;height:5px;border-radius:50%;display:inline-block;flex-shrink:0;margin-top:5px}
 .sidebar-collapsed{grid-template-columns:78px minmax(0,1fr)}
 .sidebar-collapsed .brand-copy,.sidebar-collapsed .sidebar-section-label,.sidebar-collapsed nav a>span,.sidebar-collapsed nav a>i,.sidebar-collapsed .sidebar-bottom{display:none}
 .sidebar-collapsed .app-sidebar{padding-inline:12px}.sidebar-collapsed .sidebar-brand{padding:0 8px}
@@ -99,7 +97,6 @@ button:active:not(:disabled),.button:active{transform:translateY(1px)}
 .studio-dashboard .last-practice .inline{font-size:10px}.studio-dashboard .last-practice>p{font-size:11px}
 .empty-history{font-size:11px;line-height:1.7;color:#708171;margin:0!important}.empty-history>span{font-size:10px;color:#9aa699}
 .security-shortcut{display:flex;gap:15px;align-items:center;margin-top:25px;padding:21px 24px;border:1px solid #e2e7df;background:#f8faf6;border-radius:12px;text-decoration:none;color:#57765c}
-.shortcut-icon{width:40px;height:40px;border-radius:10px;background:#e8efe3;display:flex;align-items:center;justify-content:center}
 .security-shortcut>div{flex:1}.security-shortcut b{font-size:12px;font-weight:600}.security-shortcut p{font-size:10px;color:#93a08f;margin:6px 0 0}
 .security-shortcut>span:last-child{display:flex;align-items:center;gap:8px;font-size:11px;white-space:nowrap}
 .workspace-main .content-page{padding:44px 40px;max-width:1100px}.workspace-main .site-footer{margin:0 40px;padding:20px 0;font-size:9px;color:#9ba39a;max-width:none}
@@ -125,7 +122,7 @@ button:active:not(:disabled),.button:active{transform:translateY(1px)}
  .studio-setup .provider-options{grid-template-columns:repeat(4,1fr);gap:6px}.studio-setup .provider-options button{padding:14px 2px 10px;min-height:68px}.provider-logo{font-size:14px}.studio-setup .provider-options small{font-size:10px}
  .studio-setup .difficulty-options b{font-size:11px}.studio-setup .difficulty-options small{font-size:10px}.studio-setup .difficulty-options label{padding:14px 9px}.setup-actions{padding:17px 20px}
  .studio-dashboard .dashboard-side{position:static;width:100%}.studio-venue{padding:21px}.preview-map .venue-diagram svg{height:260px}.studio-dashboard .last-practice{margin-top:15px}
- .security-shortcut{padding:18px 16px;gap:12px;margin-top:18px}.security-shortcut>span:last-child{font-size:0;gap:0}.security-shortcut b{font-size:11px}.security-shortcut p{font-size:10px;line-height:1.7}.shortcut-icon{width:34px;height:34px;flex-shrink:0}.security-shortcut>div{min-width:0}
+ .security-shortcut{padding:18px 16px;gap:12px;margin-top:18px}.security-shortcut>span:last-child{font-size:0;gap:0}.security-shortcut b{font-size:11px}.security-shortcut p{font-size:10px;line-height:1.7}.security-shortcut>svg{flex-shrink:0}.security-shortcut>div{min-width:0}
  .workspace-main .content-page{padding:28px 18px}.workspace-main .site-footer{margin:0 18px;display:block;line-height:1.8}.workspace-main .site-footer>span{display:block}
 }
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
