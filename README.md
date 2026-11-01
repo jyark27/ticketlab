@@ -16,11 +16,13 @@ NOL/멜론/YES24/티켓링크형 연습, 전체/좌석 집중/보안문자 연�
 [조사·구현·검증 기록](docs/RESEARCH.md)에 공식 근거와 연습 가정을 구분했다. 실시간 서버, 실제 예매처 계정/결제 연동은 없다. 기록은 브라우저 localStorage, 직전 설정은 sessionStorage에만 보관한다.
 
 ## 배포
-2026-11-01 사용자 요청으로 Cloudflare Pages로 이전한다. GitHub 연결은 Cloudflare 계정 로그인 후 완료해야 한다.
+Cloudflare Pages 운영 주소: https://ticketlab-v.pages.dev/
+
+GitHub의 main 브랜치와 연결되어 푸시할 때마다 자동 빌드·배포된다.
 
 - 저장소: https://github.com/jyark27/ticketlab.git
 - 운영 브랜치: main
-- 프레임워크: Vite (React)
+- 앱: Vite (React), Cloudflare 프리셋은 None + 아래 빌드 명령
 - 프로젝트 루트: 저장소 루트
 - 빌드 명령: npm run build
 - 결과 디렉터리: dist
