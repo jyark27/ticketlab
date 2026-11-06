@@ -13,7 +13,7 @@
 NOL/멜론/YES24/티켓링크형 연습, 전체/좌석 집중/보안문자 연습, 인기 공연/잠실·고척 정규시즌 및 가을야구, 반응속도 기반 대기 순번, 전체 재고 기반 좌석 판매, 스탠딩, 기록과 피드백.
 
 ## 연구 및 제한
-[조사·구현·검증 기록](docs/RESEARCH.md)에 공식 근거와 연습 가정을 구분했다. 실시간 서버, 실제 예매처 계정/결제 연동은 없다. 기록은 브라우저 localStorage, 직전 설정은 sessionStorage에만 보관한다.
+공식 안내와 연습용 가정을 구분하며, 참고 링크는 src/venues.ts와 src/platforms.ts에 기록했다. 실시간 서버, 실제 예매처 계정/결제 연동은 없다. 기록은 브라우저 localStorage, 직전 설정은 sessionStorage에만 보관한다.
 
 ## 배포
 Cloudflare Pages 운영 주소: https://ticketlab-v.pages.dev/
