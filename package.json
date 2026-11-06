@@ -1,12 +1,13 @@
 {
-  "name": "nol-ticket-practice",
+  "name": "ticketlab",
   "private": true,
   "version": "1.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite --host 127.0.0.1",
     "build": "tsc -b && vite build",
-    "test": "vitest run src"
+    "test": "vitest run src",
+    "generate:maps": "python scripts/generate-baseball-regions.py"
   },
   "dependencies": {
     "react": "^19.2.0",

@@ -1,8 +1,7 @@
 param([switch]$NoBrowser)
 $ErrorActionPreference = 'Stop'
 $projectPath = $PSScriptRoot
-$runtimeNode = Join-Path $env:USERPROFILE '.cache\codex-runtimes\codex-primary-runtime\dependencies\node\bin\node.exe'
-if (Test-Path -LiteralPath $runtimeNode) { $nodePath = $runtimeNode } else { $nodePath = (Get-Command node -ErrorAction Stop).Source }
+$nodePath = (Get-Command node -ErrorAction Stop).Source
 $vitePath = Join-Path $projectPath 'node_modules\vite\bin\vite.js'
 if (-not (Test-Path -LiteralPath $vitePath)) {
   Push-Location -LiteralPath $projectPath

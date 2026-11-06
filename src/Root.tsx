@@ -1,73 +1,718 @@
-import PalettePreview,{usePalettePreview} from './PalettePreview';
-import {useEffect,useRef,useState} from 'react';
-import {ArrowRight,ArrowLeft,ArrowUpRight,Check,Clock3,Target,Ticket,PanelLeftOpen,PanelLeftClose,LayoutGrid,ChartNoAxesCombined,Keyboard,ChevronRight,Music2,MousePointer2,History} from 'lucide-react';
-import App,{type PracticeOptions} from './App';
+import { useEffect, useRef, useState } from 'react';
+import {
+  ArrowRight,
+  ArrowLeft,
+  ArrowUpRight,
+  Check,
+  Target,
+  Ticket,
+  PanelLeftOpen,
+  PanelLeftClose,
+  LayoutGrid,
+  ChartNoAxesCombined,
+  Keyboard,
+  ChevronRight,
+  Music2,
+  MousePointer2,
+  History,
+} from 'lucide-react';
+import App, { type PracticeOptions } from './App';
 import VenueDiagram from './VenueDiagram';
 import SecurityCode from './SecurityCode';
 import BaseballPhotos from './BaseballPhotos';
-import {PLATFORMS,getPlatform,type PlatformId} from './platforms';
-import {DIFFICULTY,SCENARIOS,type Difficulty,type Scenario,type PracticeMode} from './simulator';
-import {bookingRoute} from './bookingRoute';
-import {VENUES,baseballVenues,concertVenues,getVenue,sectionCapacity,type VenueId} from './venues';
-import {readRecords,clearRecords,seconds} from './records';
-function sessionDates(){const d=new Date();d.setDate(d.getDate()+((6-d.getDay()+7)%7||7));return [0,1].map(n=>{const day=new Date(d);day.setDate(day.getDate()+n);return day.toLocaleDateString('ko-KR',{year:'numeric',month:'long',day:'numeric',weekday:'short'})+' 18:00';});}
-function Header({page,collapsed,onCollapse}:{page:string;collapsed:boolean;onCollapse:()=>void}){
- const links=[{href:'#',id:'',label:'예매 연습',icon:LayoutGrid},{href:'#records',id:'records',label:'나의 기록',icon:ChartNoAxesCombined},{href:'#security',id:'security',label:'보안문자 연습',icon:Keyboard}];
- return <aside className="app-sidebar"><a className="sidebar-brand" href="#" aria-label="티켓연습실 홈"><span className="brand-icon"><Ticket size={23}/></span><span className="brand-copy">ticket<span>lab</span><small>티켓연습실</small></span></a><button className="collapse-sidebar" onClick={onCollapse} aria-label={collapsed?'메뉴 펼치기':'메뉴 접기'} aria-expanded={!collapsed}>{collapsed?<PanelLeftOpen size={18}/>:<PanelLeftClose size={18}/>}</button><nav aria-label="주 메뉴">{links.map(({href,id,label,icon:Icon})=><a key={id} href={href} className={page===id?'active':''} aria-current={page===id?'page':undefined} title={collapsed?label:undefined}><Icon size={19}/><span>{label}</span>{page===id&&<i/>}</a>)}</nav><div className="sidebar-bottom"><span>실제 결제 없는 연습 공간<small>기록은 이 브라우저에 저장돼요.</small></span></div></aside>;
+import { PLATFORMS, getPlatform, type PlatformId } from './platforms';
+import {
+  DIFFICULTY,
+  SCENARIOS,
+  type Difficulty,
+  type Scenario,
+  type PracticeMode,
+} from './simulator';
+import { bookingRoute } from './bookingRoute';
+import {
+  VENUES,
+  baseballVenues,
+  concertVenues,
+  getVenue,
+  sectionCapacity,
+  type VenueId,
+} from './venues';
+import { readRecords, clearRecords, seconds } from './records';
+function sessionDates() {
+  const d = new Date();
+  d.setDate(d.getDate() + ((6 - d.getDay() + 7) % 7 || 7));
+  return [0, 1].map((n) => {
+    const day = new Date(d);
+    day.setDate(day.getDate() + n);
+    return (
+      day.toLocaleDateString('ko-KR', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        weekday: 'short',
+      }) + ' 18:00'
+    );
+  });
 }
-export default function Root(){
- const {palette,select,review}=usePalettePreview();
- const [sidebarCollapsed,setSidebarCollapsed]=useState(false);
- const [route,setRoute]=useState(()=>location.hash.slice(1));useEffect(()=>{const update=()=>{setRoute(location.hash.slice(1));window.scrollTo(0,0);};addEventListener('hashchange',update);return()=>removeEventListener('hashchange',update);},[]);
- const [name,query='']=route.split('?'),resolved=bookingRoute(name,new URLSearchParams(query)),p=resolved?.platform;
- useEffect(()=>{document.title=p?p.name+'형 예매 연습 · 티켓연습실':'티켓연습실 · 예매 리허설';document.documentElement.style.setProperty('--primary',p?.accent??'#176b4b');document.documentElement.style.setProperty('--tint',p?.tint??'#edf5f0');},[p]);
- if(p&&resolved){const q=new URLSearchParams(query),d=q.get('difficulty');const options:PracticeOptions={venue:resolved.venue,difficulty:['easy','normal','hard'].includes(d??'')?d as Difficulty:'hard',mode:q.get('mode')==='seats'?'seats':'full',scenario:resolved.scenario,session:sessionDates()[q.get('session')==='1'?1:0],target:q.get('section')??undefined};return <App key={route} platform={p} options={options} onHome={()=>{location.hash='';}}/>;}
- return <div className={'workspace-shell '+(sidebarCollapsed?'sidebar-collapsed':'')}><Header page={name} collapsed={sidebarCollapsed} onCollapse={()=>setSidebarCollapsed(v=>!v)}/><div className="workspace-main">{review&&<PalettePreview palette={palette} onSelect={select}/ >}{name==='records'?<Records/>:name==='security'?<SecurityPractice/>:<Dashboard/>}</div></div>;
+function Header({
+  page,
+  collapsed,
+  onCollapse,
+}: {
+  page: string;
+  collapsed: boolean;
+  onCollapse: () => void;
+}) {
+  const links = [
+    { href: '#', id: '', label: '예매 연습', icon: LayoutGrid },
+    { href: '#records', id: 'records', label: '나의 기록', icon: ChartNoAxesCombined },
+    { href: '#security', id: 'security', label: '보안문자 연습', icon: Keyboard },
+  ];
+  return (
+    <aside className="app-sidebar">
+      <a className="sidebar-brand" href="#" aria-label="티켓연습실 홈">
+        <span className="brand-icon">
+          <Ticket size={23} />
+        </span>
+        <span className="brand-copy">
+          ticket<span>lab</span>
+          <small>티켓연습실</small>
+        </span>
+      </a>
+      <button
+        className="collapse-sidebar"
+        onClick={onCollapse}
+        aria-label={collapsed ? '메뉴 펼치기' : '메뉴 접기'}
+        aria-expanded={!collapsed}
+      >
+        {collapsed ? <PanelLeftOpen size={18} /> : <PanelLeftClose size={18} />}
+      </button>
+      <nav aria-label="주 메뉴">
+        {links.map(({ href, id, label, icon: Icon }) => (
+          <a
+            key={id}
+            href={href}
+            className={page === id ? 'active' : ''}
+            aria-current={page === id ? 'page' : undefined}
+            title={collapsed ? label : undefined}
+          >
+            <Icon size={19} />
+            <span>{label}</span>
+            {page === id && <i />}
+          </a>
+        ))}
+      </nav>
+      <div className="sidebar-bottom">
+        <span>
+          실제 결제 없는 연습 공간<small>기록은 이 브라우저에 저장돼요.</small>
+        </span>
+      </div>
+    </aside>
+  );
 }
-function readSetup(){try{const s=JSON.parse(sessionStorage.getItem('ticketlab-setup-v1')??'{}');return s&&typeof s==='object'?s:{};}catch{return {};}}
-function Dashboard(){
- const [saved]=useState(readSetup);
- const [step,setStep]=useState(0);
- const setupRef=useRef<HTMLElement>(null),previousStep=useRef(step);
- useEffect(()=>{if(previousStep.current===step)return;previousStep.current=step;setupRef.current?.scrollIntoView({behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'});setupRef.current?.querySelector<HTMLElement>('.setup-intro h2')?.focus({preventScroll:true});},[step]);
- const [category,setCategory]=useState<'concert'|'baseball'>(saved.category==='baseball'?'baseball':'concert'),[provider,setProvider]=useState<PlatformId>(saved.category==='baseball'?(saved.provider==='ticketlink'?'ticketlink':'nol'):(getPlatform(saved.provider)?.id??'nol')),[venueId,setVenueId]=useState<VenueId>(VENUES.find(v=>v.id===saved.venueId)?.id??'goyang'),[difficulty,setDifficulty]=useState<Difficulty>(['easy','normal','hard'].includes(saved.difficulty)?saved.difficulty:'hard'),[mode,setMode]=useState<PracticeMode>(saved.mode==='seats'?'seats':'full'),[scenario,setScenario]=useState<Scenario>(['opening','postseason','regular'].includes(saved.scenario)?saved.scenario:'opening'),[session,setSession]=useState(saved.session==='1'?'1':'0'),[previewSection,setPreviewSection]=useState(typeof saved.previewSection==='string'?saved.previewSection:'S1');
- const venue=getVenue(category==='baseball'?(baseballVenues.some(v=>v.id===venueId)?venueId:'jamsil'):(concertVenues.some(v=>v.id===venueId)?venueId:'goyang')),records=readRecords(),recent=records[0];
- const target=venue.sections.find(s=>s.id===previewSection)??venue.sections[0];
- const actualScenario:Scenario=category==='baseball'?(scenario==='regular'?'regular':'postseason'):'opening';
- function launch(){try{sessionStorage.setItem('ticketlab-setup-v1',JSON.stringify({category,provider,venueId,difficulty,mode,scenario,session,previewSection:target.id}));}catch{}const q=new URLSearchParams({venue:venue.id,provider,difficulty,mode,section:target.id,scenario:actualScenario,session});location.hash=(category==='baseball'?'baseball':provider)+'?'+q.toString();}
- return <main id="main" className="dashboard studio-dashboard">
-
- <div className="dashboard-title"><div><h1>예매 연습</h1></div></div>
- <div className="dashboard-grid">
- <section ref={setupRef} className="setup-panel studio-setup" aria-label="연습 설정">
- <div className="setup-steps" aria-label="설정 단계">{['예매 환경','연습 강도'].map((label,i)=><button key={label} className={step===i?'active':step>i?'complete':''} aria-current={step===i?'step':undefined} onClick={()=>setStep(i)}><span>{step>i?<Check size={14}/>:String(i+1).padStart(2,'0')}</span><b>{label}</b>{i===0&&<ChevronRight size={15}/>}</button>)}</div>
- <div className="setup-content" key={step}>
- {step===0?<><div className="setup-intro"><h2 tabIndex={-1}>예매 환경</h2></div>
- <div className="category-tabs" role="group" aria-label="예매 종류"><button className={category==='concert'?'active':''} aria-pressed={category==='concert'} onClick={()=>{setCategory('concert');setScenario('opening');}}><Music2 size={16}/>콘서트</button><button className={category==='baseball'?'active':''} aria-pressed={category==='baseball'} onClick={()=>{setCategory('baseball');setProvider(provider==='ticketlink'?'ticketlink':'nol');setScenario('postseason');}}><Target size={16}/>야구</button></div>
- <div className="field-section"><span className="field-title">예매처</span><div className="provider-options" role="group" aria-label="예매처">{(category==='baseball'?PLATFORMS.filter(p=>p.id==='nol'||p.id==='ticketlink'):PLATFORMS).map(p=><button key={p.id} className={(provider===p.id)?'active':''} aria-pressed={provider===p.id} onClick={()=>{setProvider(p.id);}}><span className="provider-logo">{p.logo}</span><small>{p.name}</small>{(provider===p.id)&&<Check size={13} className="provider-check"/>}</button>)}</div>{category==='baseball'&&<p className="small muted">NOL · 티켓링크 화면 연습 / 가상 경기당 최대 4매</p>}</div>
- <label className="field-section"><span className="field-title">{category==='baseball'?'야구장':'공연장'}</span><select value={venue.id} onChange={e=>{setVenueId(e.target.value as VenueId);setPreviewSection(getVenue(e.target.value as VenueId).sections[0].id);}}>{(category==='baseball'?baseballVenues:concertVenues).map(v=><option key={v.id} value={v.id}>{v.name}</option>)}</select></label>
- <label className="field-section"><span className="field-title">가상 회차</span><select value={session} onChange={e=>setSession(e.target.value)}>{sessionDates().map((d,i)=><option key={d} value={i}>{d}</option>)}</select></label>
- </>:<><div className="setup-intro"><h2 tabIndex={-1}>연습 강도</h2></div>
- <fieldset className="field-section"><legend className="field-title">난이도</legend><div className="difficulty-options">{(['easy','normal','hard'] as const).map((d,i)=><label key={d} className={difficulty===d?'active':''}><input type="radio" name="difficulty" value={d} checked={difficulty===d} onChange={()=>{setDifficulty(d);}}/><span className={'difficulty-bars level-'+i} aria-hidden="true"><i/><i/><i/></span><b>{DIFFICULTY[d].label}</b><small>{d==='easy'?'화면과 순서 익히기':d==='normal'?'구역 판단 · 연석 확보':'0.3초 지연 → 약 3만 명'}</small></label>)}</div></fieldset>
- <label className="field-section"><span className="field-title">경쟁 상황</span><select value={actualScenario} onChange={e=>{setScenario(e.target.value as Scenario);}}>{(category==='baseball'?['postseason','regular']:['opening']).map(id=><option key={id} value={id}>{SCENARIOS[id as Scenario].label}</option>)}</select><p className="small muted">{SCENARIOS[actualScenario].detail}</p></label>
- <fieldset className="field-section"><legend className="field-title">연습 범위</legend><div className="mode-options"><label className={mode==='full'?'active':''}><input type="radio" name="mode" checked={mode==='full'} onChange={()=>{setMode('full');}}/><span><b>전체 과정</b><small>오픈 → 대기 → 좌석 → 결제</small></span></label><label className={mode==='seats'?'active':''}><input type="radio" name="mode" checked={mode==='seats'} onChange={()=>{setMode('seats');}}/><span><b>좌석 집중</b><small>구역·좌석 선택부터 시작</small></span></label></div></fieldset>
- <div className="setup-review"><Check size={16}/><div><b>{getPlatform(provider)?.name} · {venue.name}</b><small>목표 구역 {target.label} · {mode==='full'?'전체 과정':'좌석 집중'}</small></div><button onClick={()=>setStep(0)} aria-label="예매 환경 수정">수정</button></div>
- </>}
- </div>
- <div className="setup-actions"><div>{step===0?<><span>1 / 2</span></>:<button className="text-button" onClick={()=>setStep(0)}><ArrowLeft size={16}/>이전</button>}</div><button className="primary" onClick={()=>step===0?setStep(1):launch()}>{step===0?'다음 단계':'연습 시작하기'}<ArrowRight size={17}/></button></div>
- </section>
- <aside className="dashboard-side"><section className="venue-preview studio-venue"><div className="panel-heading"><div><h2>{venue.name}</h2></div><span>{venue.city}</span></div><div className="preview-map"><VenueDiagram venue={venue} selected={target.id} available={id=>sectionCapacity(venue.id,id)} onSection={setPreviewSection}/></div>{venue.type==='baseball'&&<BaseballPhotos key={venue.id} venue={venue} section={target.id}/>}<div className="target-section" aria-live="polite"><span><MousePointer2 size={15}/>목표 구역</span><strong>{target.label}</strong><span className="target-kind">{target.kind==='standing'?'스탠딩':'지정석'}</span></div></section>
- <section className="last-practice"><div className="section-heading"><h2><History size={16}/>최근 연습</h2><a href="#records">전체 보기 <ArrowUpRight size={13}/></a></div>{recent?<><div className="inline between"><strong>{recent.success?'좌석 확보 성공':'연습 종료'}</strong><time>{new Date(recent.date).toLocaleDateString('ko-KR')}</time></div><p>{getPlatform(recent.platform??'nol')?.name??'예매 연습'} · {recent.venue?getVenue(recent.venue).name:'공연장'}</p><div className="inline between"><span>오픈 반응 {seconds(recent.openDelayMs)}</span><span>전체 {Math.round(recent.elapsed)}초</span></div></>:<p className="empty-history">연습 기록 없음</p>}</section></aside>
- </div>
- <a className="security-shortcut" href="#security"><Keyboard size={22} aria-hidden="true"/><div><b>보안문자 5회 연습</b></div><span>시작<ArrowUpRight size={17}/></span></a>
- </main>;
+export default function Root() {
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [route, setRoute] = useState(() => location.hash.slice(1));
+  useEffect(() => {
+    const update = () => {
+      setRoute(location.hash.slice(1));
+      window.scrollTo(0, 0);
+    };
+    addEventListener('hashchange', update);
+    return () => removeEventListener('hashchange', update);
+  }, []);
+  const [name, query = ''] = route.split('?'),
+    resolved = bookingRoute(name, new URLSearchParams(query)),
+    p = resolved?.platform;
+  useEffect(() => {
+    document.title = p ? p.name + '형 예매 연습 · 티켓연습실' : '티켓연습실 · 예매 리허설';
+    document.documentElement.style.setProperty('--primary', p?.accent ?? '#176b4b');
+    document.documentElement.style.setProperty('--tint', p?.tint ?? '#edf5f0');
+  }, [p]);
+  if (p && resolved) {
+    const q = new URLSearchParams(query),
+      d = q.get('difficulty');
+    const options: PracticeOptions = {
+      venue: resolved.venue,
+      difficulty: ['easy', 'normal', 'hard'].includes(d ?? '') ? (d as Difficulty) : 'hard',
+      mode: q.get('mode') === 'seats' ? 'seats' : 'full',
+      scenario: resolved.scenario,
+      session: sessionDates()[q.get('session') === '1' ? 1 : 0],
+      target: q.get('section') ?? undefined,
+    };
+    return (
+      <App
+        key={route}
+        platform={p}
+        options={options}
+        onHome={() => {
+          location.hash = '';
+        }}
+      />
+    );
+  }
+  return (
+    <div className={'workspace-shell ' + (sidebarCollapsed ? 'sidebar-collapsed' : '')}>
+      <Header
+        page={name}
+        collapsed={sidebarCollapsed}
+        onCollapse={() => setSidebarCollapsed((v) => !v)}
+      />
+      <div className="workspace-main">
+        {name === 'records' ? (
+          <Records />
+        ) : name === 'security' ? (
+          <SecurityPractice />
+        ) : (
+          <Dashboard />
+        )}
+      </div>
+    </div>
+  );
 }
-function Records(){
- const [records,setRecords]=useState(readRecords),[filter,setFilter]=useState('all'),[confirm,setConfirm]=useState(false),[error,setError]=useState(false);const visible=records.filter(r=>filter==='all'||(filter==='success'?r.success:!r.success));
- return <main id="main" className="content-page"><div className="dashboard-title"><div><h1>연습 기록</h1></div><a className="button" href="#">다시 연습하기 <ArrowRight size={16}/></a></div><div className="record-controls"><select aria-label="결과 필터" value={filter} onChange={e=>setFilter(e.target.value)}><option value="all">전체 결과</option><option value="success">성공</option><option value="failed">실패·중단</option></select><span>{visible.length}회</span><button disabled={!records.length} className="text-button" onClick={()=>setConfirm(true)}>기록 삭제</button></div>{confirm&&<div className="notice inline"><span>이 브라우저의 모든 기록을 삭제할까요?</span><button onClick={()=>{if(clearRecords()){setRecords([]);setConfirm(false);}else setError(true);}}>모두 삭제</button><button onClick={()=>setConfirm(false)}>취소</button></div>}{error&&<p className="error">저장 공간에 접근할 수 없습니다.</p>}
- {!visible.length?<div className="empty large"><h2>표시할 연습 기록이 없습니다.</h2><p>전체 과정이나 좌석 집중 연습을 완료하면 기록이 남습니다.</p><a className="primary button" href="#">연습 시작하기</a></div>:<div className="records-table"><table><thead><tr><th>연습</th><th>결과</th><th>오픈 반응</th><th>대기 순번</th><th>첫 좌석</th><th>전체 시간</th></tr></thead><tbody>{visible.map(r=><tr key={r.id}><td><b>{getPlatform(r.platform??'nol')?.name??'예매 연습'} · {DIFFICULTY[r.difficulty].label}</b><small>{r.venue?getVenue(r.venue).name:'공연장'} · {new Date(r.date).toLocaleString('ko-KR')} · {r.mode==='seats'?'좌석 집중':'전체 과정'}</small></td><td><span className={r.success?'result-success':'muted'}>{r.success?'성공':'종료'}</span><small>{r.success?r.seats.length+'매':r.reason??'시간 종료'}</small></td><td>{seconds(r.openDelayMs)}</td><td>{r.mode==='seats'?'—':r.queueRank?.toLocaleString()??'—'}</td><td>{seconds(r.seatMs)}</td><td>{Math.round(r.elapsed)}초</td></tr>)}</tbody></table></div>}</main>;
+function readSetup() {
+  try {
+    const s = JSON.parse(sessionStorage.getItem('ticketlab-setup-v1') ?? '{}');
+    return s && typeof s === 'object' ? s : {};
+  } catch {
+    return {};
+  }
 }
-function SecurityPractice(){
- const [rounds,setRounds]=useState<number[]>([]),[errors,setErrors]=useState(0),[started,setStarted]=useState(Date.now()),[key,setKey]=useState(0);
- return <main id="main" className="content-page narrow"><a className="quiet-link" href="#">← 연습 설정</a><h1>보안문자 연습</h1><section className="center-panel"><span className="eyebrow">{Math.min(rounds.length+1,5)} / 5</span>{rounds.length<5?<SecurityCode key={key} onError={()=>setErrors(e=>e+1)} onVerify={()=>{const n=Date.now();setRounds(r=>[...r,n-started]);setStarted(n);}}/>:<><h2>5회 연습 완료</h2><div className="result-metrics"><div><small>평균 입력 시간</small><strong>{seconds(rounds.reduce((a,b)=>a+b,0)/5)}</strong></div><div><small>오입력</small><strong>{errors}회</strong></div></div><p>문자가 바뀌면 한 번에 읽고 입력하는 연습을 해 보세요.</p><button className="primary full" onClick={()=>{setRounds([]);setErrors(0);setStarted(Date.now());setKey(k=>k+1);}}>5회 다시 연습</button></>}</section></main>;
+function Dashboard() {
+  const [saved] = useState(readSetup);
+  const [step, setStep] = useState(0);
+  const setupRef = useRef<HTMLElement>(null),
+    previousStep = useRef(step);
+  useEffect(() => {
+    if (previousStep.current === step) return;
+    previousStep.current = step;
+    setupRef.current?.scrollIntoView({
+      behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
+      block: 'start',
+    });
+    setupRef.current?.querySelector<HTMLElement>('.setup-intro h2')?.focus({ preventScroll: true });
+  }, [step]);
+  const [category, setCategory] = useState<'concert' | 'baseball'>(
+      saved.category === 'baseball' ? 'baseball' : 'concert',
+    ),
+    [provider, setProvider] = useState<PlatformId>(
+      saved.category === 'baseball'
+        ? saved.provider === 'ticketlink'
+          ? 'ticketlink'
+          : 'nol'
+        : (getPlatform(saved.provider)?.id ?? 'nol'),
+    ),
+    [venueId, setVenueId] = useState<VenueId>(
+      VENUES.find((v) => v.id === saved.venueId)?.id ?? 'goyang',
+    ),
+    [difficulty, setDifficulty] = useState<Difficulty>(
+      ['easy', 'normal', 'hard'].includes(saved.difficulty) ? saved.difficulty : 'hard',
+    ),
+    [mode, setMode] = useState<PracticeMode>(saved.mode === 'seats' ? 'seats' : 'full'),
+    [scenario, setScenario] = useState<Scenario>(
+      ['opening', 'postseason', 'regular'].includes(saved.scenario) ? saved.scenario : 'opening',
+    ),
+    [session, setSession] = useState(saved.session === '1' ? '1' : '0'),
+    [previewSection, setPreviewSection] = useState(
+      typeof saved.previewSection === 'string' ? saved.previewSection : 'S1',
+    );
+  const venue = getVenue(
+      category === 'baseball'
+        ? baseballVenues.some((v) => v.id === venueId)
+          ? venueId
+          : 'jamsil'
+        : concertVenues.some((v) => v.id === venueId)
+          ? venueId
+          : 'goyang',
+    ),
+    records = readRecords(),
+    recent = records[0];
+  const target = venue.sections.find((s) => s.id === previewSection) ?? venue.sections[0];
+  const actualScenario: Scenario =
+    category === 'baseball' ? (scenario === 'regular' ? 'regular' : 'postseason') : 'opening';
+  function launch() {
+    try {
+      sessionStorage.setItem(
+        'ticketlab-setup-v1',
+        JSON.stringify({
+          category,
+          provider,
+          venueId,
+          difficulty,
+          mode,
+          scenario,
+          session,
+          previewSection: target.id,
+        }),
+      );
+    } catch {}
+    const q = new URLSearchParams({
+      venue: venue.id,
+      provider,
+      difficulty,
+      mode,
+      section: target.id,
+      scenario: actualScenario,
+      session,
+    });
+    location.hash = (category === 'baseball' ? 'baseball' : provider) + '?' + q.toString();
+  }
+  return (
+    <main id="main" className="dashboard studio-dashboard">
+      <div className="dashboard-title">
+        <div>
+          <h1>예매 연습</h1>
+        </div>
+      </div>
+      <div className="dashboard-grid">
+        <section ref={setupRef} className="setup-panel studio-setup" aria-label="연습 설정">
+          <div className="setup-steps" aria-label="설정 단계">
+            {['예매 환경', '연습 강도'].map((label, i) => (
+              <button
+                key={label}
+                className={step === i ? 'active' : step > i ? 'complete' : ''}
+                aria-current={step === i ? 'step' : undefined}
+                onClick={() => setStep(i)}
+              >
+                <span>{step > i ? <Check size={14} /> : String(i + 1).padStart(2, '0')}</span>
+                <b>{label}</b>
+                {i === 0 && <ChevronRight size={15} />}
+              </button>
+            ))}
+          </div>
+          <div className="setup-content" key={step}>
+            {step === 0 ? (
+              <>
+                <div className="setup-intro">
+                  <h2 tabIndex={-1}>예매 환경</h2>
+                </div>
+                <div className="category-tabs" role="group" aria-label="예매 종류">
+                  <button
+                    className={category === 'concert' ? 'active' : ''}
+                    aria-pressed={category === 'concert'}
+                    onClick={() => {
+                      setCategory('concert');
+                      setScenario('opening');
+                    }}
+                  >
+                    <Music2 size={16} />
+                    콘서트
+                  </button>
+                  <button
+                    className={category === 'baseball' ? 'active' : ''}
+                    aria-pressed={category === 'baseball'}
+                    onClick={() => {
+                      setCategory('baseball');
+                      setProvider(provider === 'ticketlink' ? 'ticketlink' : 'nol');
+                      setScenario('postseason');
+                    }}
+                  >
+                    <Target size={16} />
+                    야구
+                  </button>
+                </div>
+                <div className="field-section">
+                  <span className="field-title">예매처</span>
+                  <div className="provider-options" role="group" aria-label="예매처">
+                    {(category === 'baseball'
+                      ? PLATFORMS.filter((p) => p.id === 'nol' || p.id === 'ticketlink')
+                      : PLATFORMS
+                    ).map((p) => (
+                      <button
+                        key={p.id}
+                        className={provider === p.id ? 'active' : ''}
+                        aria-pressed={provider === p.id}
+                        onClick={() => {
+                          setProvider(p.id);
+                        }}
+                      >
+                        <span className="provider-logo">{p.logo}</span>
+                        <small>{p.name}</small>
+                        {provider === p.id && <Check size={13} className="provider-check" />}
+                      </button>
+                    ))}
+                  </div>
+                  {category === 'baseball' && (
+                    <p className="small muted">NOL · 티켓링크 화면 연습 / 가상 경기당 최대 4매</p>
+                  )}
+                </div>
+                <label className="field-section">
+                  <span className="field-title">
+                    {category === 'baseball' ? '야구장' : '공연장'}
+                  </span>
+                  <select
+                    value={venue.id}
+                    onChange={(e) => {
+                      setVenueId(e.target.value as VenueId);
+                      setPreviewSection(getVenue(e.target.value as VenueId).sections[0].id);
+                    }}
+                  >
+                    {(category === 'baseball' ? baseballVenues : concertVenues).map((v) => (
+                      <option key={v.id} value={v.id}>
+                        {v.name}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label className="field-section">
+                  <span className="field-title">가상 회차</span>
+                  <select value={session} onChange={(e) => setSession(e.target.value)}>
+                    {sessionDates().map((d, i) => (
+                      <option key={d} value={i}>
+                        {d}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              </>
+            ) : (
+              <>
+                <div className="setup-intro">
+                  <h2 tabIndex={-1}>연습 강도</h2>
+                </div>
+                <fieldset className="field-section">
+                  <legend className="field-title">난이도</legend>
+                  <div className="difficulty-options">
+                    {(['easy', 'normal', 'hard'] as const).map((d, i) => (
+                      <label key={d} className={difficulty === d ? 'active' : ''}>
+                        <input
+                          type="radio"
+                          name="difficulty"
+                          value={d}
+                          checked={difficulty === d}
+                          onChange={() => {
+                            setDifficulty(d);
+                          }}
+                        />
+                        <span className={'difficulty-bars level-' + i} aria-hidden="true">
+                          <i />
+                          <i />
+                          <i />
+                        </span>
+                        <b>{DIFFICULTY[d].label}</b>
+                        <small>
+                          {d === 'easy'
+                            ? '화면과 순서 익히기'
+                            : d === 'normal'
+                              ? '구역 판단 · 연석 확보'
+                              : '0.3초 지연 → 약 3만 명'}
+                        </small>
+                      </label>
+                    ))}
+                  </div>
+                </fieldset>
+                <label className="field-section">
+                  <span className="field-title">경쟁 상황</span>
+                  <select
+                    value={actualScenario}
+                    onChange={(e) => {
+                      setScenario(e.target.value as Scenario);
+                    }}
+                  >
+                    {(category === 'baseball' ? ['postseason', 'regular'] : ['opening']).map(
+                      (id) => (
+                        <option key={id} value={id}>
+                          {SCENARIOS[id as Scenario].label}
+                        </option>
+                      ),
+                    )}
+                  </select>
+                  <p className="small muted">{SCENARIOS[actualScenario].detail}</p>
+                </label>
+                <fieldset className="field-section">
+                  <legend className="field-title">연습 범위</legend>
+                  <div className="mode-options">
+                    <label className={mode === 'full' ? 'active' : ''}>
+                      <input
+                        type="radio"
+                        name="mode"
+                        checked={mode === 'full'}
+                        onChange={() => {
+                          setMode('full');
+                        }}
+                      />
+                      <span>
+                        <b>전체 과정</b>
+                        <small>오픈 → 대기 → 좌석 → 결제</small>
+                      </span>
+                    </label>
+                    <label className={mode === 'seats' ? 'active' : ''}>
+                      <input
+                        type="radio"
+                        name="mode"
+                        checked={mode === 'seats'}
+                        onChange={() => {
+                          setMode('seats');
+                        }}
+                      />
+                      <span>
+                        <b>좌석 집중</b>
+                        <small>구역·좌석 선택부터 시작</small>
+                      </span>
+                    </label>
+                  </div>
+                </fieldset>
+                <div className="setup-review">
+                  <Check size={16} />
+                  <div>
+                    <b>
+                      {getPlatform(provider)?.name} · {venue.name}
+                    </b>
+                    <small>
+                      목표 구역 {target.label} · {mode === 'full' ? '전체 과정' : '좌석 집중'}
+                    </small>
+                  </div>
+                  <button onClick={() => setStep(0)} aria-label="예매 환경 수정">
+                    수정
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+          <div className="setup-actions">
+            <div>
+              {step === 0 ? (
+                <>
+                  <span>1 / 2</span>
+                </>
+              ) : (
+                <button className="text-button" onClick={() => setStep(0)}>
+                  <ArrowLeft size={16} />
+                  이전
+                </button>
+              )}
+            </div>
+            <button className="primary" onClick={() => (step === 0 ? setStep(1) : launch())}>
+              {step === 0 ? '다음 단계' : '연습 시작하기'}
+              <ArrowRight size={17} />
+            </button>
+          </div>
+        </section>
+        <aside className="dashboard-side">
+          <section className="venue-preview studio-venue">
+            <div className="panel-heading">
+              <div>
+                <h2>{venue.name}</h2>
+              </div>
+              <span>{venue.city}</span>
+            </div>
+            <div className="preview-map">
+              <VenueDiagram
+                venue={venue}
+                selected={target.id}
+                available={(id) => sectionCapacity(venue.id, id)}
+                onSection={setPreviewSection}
+              />
+            </div>
+            {venue.type === 'baseball' && (
+              <BaseballPhotos key={venue.id} venue={venue} section={target.id} />
+            )}
+            <div className="target-section" aria-live="polite">
+              <span>
+                <MousePointer2 size={15} />
+                목표 구역
+              </span>
+              <strong>{target.label}</strong>
+              <span className="target-kind">
+                {target.kind === 'standing' ? '스탠딩' : '지정석'}
+              </span>
+            </div>
+          </section>
+          <section className="last-practice">
+            <div className="section-heading">
+              <h2>
+                <History size={16} />
+                최근 연습
+              </h2>
+              <a href="#records">
+                전체 보기 <ArrowUpRight size={13} />
+              </a>
+            </div>
+            {recent ? (
+              <>
+                <div className="inline between">
+                  <strong>{recent.success ? '좌석 확보 성공' : '연습 종료'}</strong>
+                  <time>{new Date(recent.date).toLocaleDateString('ko-KR')}</time>
+                </div>
+                <p>
+                  {getPlatform(recent.platform ?? 'nol')?.name ?? '예매 연습'} ·{' '}
+                  {recent.venue ? getVenue(recent.venue).name : '공연장'}
+                </p>
+                <div className="inline between">
+                  <span>오픈 반응 {seconds(recent.openDelayMs)}</span>
+                  <span>전체 {Math.round(recent.elapsed)}초</span>
+                </div>
+              </>
+            ) : (
+              <p className="empty-history">연습 기록 없음</p>
+            )}
+          </section>
+        </aside>
+      </div>
+      <a className="security-shortcut" href="#security">
+        <Keyboard size={22} aria-hidden="true" />
+        <div>
+          <b>보안문자 5회 연습</b>
+        </div>
+        <span>
+          시작
+          <ArrowUpRight size={17} />
+        </span>
+      </a>
+    </main>
+  );
+}
+function Records() {
+  const [records, setRecords] = useState(readRecords),
+    [filter, setFilter] = useState('all'),
+    [confirm, setConfirm] = useState(false),
+    [error, setError] = useState(false);
+  const visible = records.filter(
+    (r) => filter === 'all' || (filter === 'success' ? r.success : !r.success),
+  );
+  return (
+    <main id="main" className="content-page">
+      <div className="dashboard-title">
+        <div>
+          <h1>연습 기록</h1>
+        </div>
+        <a className="button" href="#">
+          다시 연습하기 <ArrowRight size={16} />
+        </a>
+      </div>
+      <div className="record-controls">
+        <select aria-label="결과 필터" value={filter} onChange={(e) => setFilter(e.target.value)}>
+          <option value="all">전체 결과</option>
+          <option value="success">성공</option>
+          <option value="failed">실패·중단</option>
+        </select>
+        <span>{visible.length}회</span>
+        <button disabled={!records.length} className="text-button" onClick={() => setConfirm(true)}>
+          기록 삭제
+        </button>
+      </div>
+      {confirm && (
+        <div className="notice inline">
+          <span>이 브라우저의 모든 기록을 삭제할까요?</span>
+          <button
+            onClick={() => {
+              if (clearRecords()) {
+                setRecords([]);
+                setConfirm(false);
+              } else setError(true);
+            }}
+          >
+            모두 삭제
+          </button>
+          <button onClick={() => setConfirm(false)}>취소</button>
+        </div>
+      )}
+      {error && <p className="error">저장 공간에 접근할 수 없습니다.</p>}
+      {!visible.length ? (
+        <div className="empty large">
+          <h2>표시할 연습 기록이 없습니다.</h2>
+          <p>전체 과정이나 좌석 집중 연습을 완료하면 기록이 남습니다.</p>
+          <a className="primary button" href="#">
+            연습 시작하기
+          </a>
+        </div>
+      ) : (
+        <div className="records-table">
+          <table>
+            <thead>
+              <tr>
+                <th>연습</th>
+                <th>결과</th>
+                <th>오픈 반응</th>
+                <th>대기 순번</th>
+                <th>첫 좌석</th>
+                <th>전체 시간</th>
+              </tr>
+            </thead>
+            <tbody>
+              {visible.map((r) => (
+                <tr key={r.id}>
+                  <td>
+                    <b>
+                      {getPlatform(r.platform ?? 'nol')?.name ?? '예매 연습'} ·{' '}
+                      {DIFFICULTY[r.difficulty].label}
+                    </b>
+                    <small>
+                      {r.venue ? getVenue(r.venue).name : '공연장'} ·{' '}
+                      {new Date(r.date).toLocaleString('ko-KR')} ·{' '}
+                      {r.mode === 'seats' ? '좌석 집중' : '전체 과정'}
+                    </small>
+                  </td>
+                  <td>
+                    <span className={r.success ? 'result-success' : 'muted'}>
+                      {r.success ? '성공' : '종료'}
+                    </span>
+                    <small>{r.success ? r.seats.length + '매' : (r.reason ?? '시간 종료')}</small>
+                  </td>
+                  <td>{seconds(r.openDelayMs)}</td>
+                  <td>{r.mode === 'seats' ? '—' : (r.queueRank?.toLocaleString() ?? '—')}</td>
+                  <td>{seconds(r.seatMs)}</td>
+                  <td>{Math.round(r.elapsed)}초</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </main>
+  );
+}
+function SecurityPractice() {
+  const [rounds, setRounds] = useState<number[]>([]),
+    [errors, setErrors] = useState(0),
+    [started, setStarted] = useState(Date.now()),
+    [key, setKey] = useState(0);
+  return (
+    <main id="main" className="content-page narrow">
+      <a className="quiet-link" href="#">
+        ← 연습 설정
+      </a>
+      <h1>보안문자 연습</h1>
+      <section className="center-panel">
+        <span className="eyebrow">{Math.min(rounds.length + 1, 5)} / 5</span>
+        {rounds.length < 5 ? (
+          <SecurityCode
+            key={key}
+            onError={() => setErrors((e) => e + 1)}
+            onVerify={() => {
+              const n = Date.now();
+              setRounds((r) => [...r, n - started]);
+              setStarted(n);
+            }}
+          />
+        ) : (
+          <>
+            <h2>5회 연습 완료</h2>
+            <div className="result-metrics">
+              <div>
+                <small>평균 입력 시간</small>
+                <strong>{seconds(rounds.reduce((a, b) => a + b, 0) / 5)}</strong>
+              </div>
+              <div>
+                <small>오입력</small>
+                <strong>{errors}회</strong>
+              </div>
+            </div>
+            <p>문자가 바뀌면 한 번에 읽고 입력하는 연습을 해 보세요.</p>
+            <button
+              className="primary full"
+              onClick={() => {
+                setRounds([]);
+                setErrors(0);
+                setStarted(Date.now());
+                setKey((k) => k + 1);
+              }}
+            >
+              5회 다시 연습
+            </button>
+          </>
+        )}
+      </section>
+    </main>
+  );
 }
