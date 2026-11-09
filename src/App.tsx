@@ -349,7 +349,7 @@ export default function App({
                 <p className="small muted">
                   {venue.id === 'gocheok' && platform.id === 'ticketlink'
                     ? '고척 × 티켓링크는 화면 조작 연습 조합입니다. 실제 키움 홈경기는 NOL에서 예매합니다.'
-                    : '공식 구장 이미지를 참고한 가상 경기입니다. 매수·가격·시간은 연습 설정입니다.'}
+                    : '구장 좌석도를 참고한 가상 경기입니다. 매수·가격·시간은 연습 설정입니다.'}
                 </p>
               )}
               <div className="start-box">

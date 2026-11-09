@@ -119,7 +119,9 @@ export const seatLabel = (id: string) => {
     ? id
     : s.kind === 'standing'
       ? s.section + ' 스탠딩 입장번호 ' + String(s.ordinal).padStart(3, '0')
-      : s.section + '구역 ' + s.row + '열 ' + s.number + '번';
+      : (s.venue === 'daejeon'
+          ? getVenue(s.venue).sections.find((section) => section.id === s.section)!.label
+          : s.section + '구역') + ' ' + s.row + '열 ' + s.number + '번';
 };
 export const totalPrice = (ids: string[]) =>
   ids.reduce((sum, id) => sum + (byId.get(id)?.price ?? 0), 0);

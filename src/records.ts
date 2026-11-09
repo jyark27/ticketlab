@@ -1,4 +1,5 @@
 import type { RecordEntry } from './simulator';
+import { VENUES } from './venues';
 const KEY = 'ticketlab-records-v1';
 export function parseRecords(raw: string | null): RecordEntry[] {
   try {
@@ -19,8 +20,7 @@ export function parseRecords(raw: string | null): RecordEntry[] {
           Array.isArray(r.seats) &&
           r.seats.every((s: unknown) => typeof s === 'string') &&
           ['easy', 'normal', 'hard'].includes(r.difficulty) &&
-          (!r.venue ||
-            ['kspo', 'inspire', 'goyang', 'worldcup', 'jamsil', 'gocheok'].includes(r.venue)),
+          (!r.venue || VENUES.some((venue) => venue.id === r.venue)),
       )
       .slice(0, 100);
   } catch {

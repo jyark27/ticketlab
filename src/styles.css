@@ -3523,6 +3523,10 @@ button:active:not(:disabled):not(.seat),
     fill 0.15s,
     stroke 0.15s;
 }
+.daejeon .baseball-region {
+  stroke-width: 1;
+  vector-effect: none;
+}
 .baseball-region:hover {
   fill: #ffffff50;
   stroke: #153f64;

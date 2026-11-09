@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import regions from './baseballRegions.json';
+import daejeonPaths from './daejeonRegions.json';
+import { getVenue } from './venues';
+
 describe('numbered baseball hit areas', () => {
   it('provides every numbered Jamsil block independently', () => {
     const blocks = regions.jamsil.blocks;
@@ -26,5 +29,19 @@ describe('numbered baseball hit areas', () => {
   it('retains independent Gocheok blocks', () => {
     expect(regions.gocheok.blocks).toHaveLength(159);
     expect(new Set(regions.gocheok.blocks.map((b) => b.id)).size).toBe(159);
+  });
+  it('connects every Daejeon block to a distinct practice section', () => {
+    const numbers = (first: number, last: number) =>
+      Array.from({ length: last - first + 1 }, (_, i) => String(first + i));
+    const expected = [
+      ...numbers(101, 124), ...numbers(200, 225), '301', '302', ...numbers(326, 330),
+      ...numbers(400, 426), ...numbers(500, 509),
+      ...numbers(1, 31).map((n) => 'S' + n.padStart(2, '0')),
+      ...['A', 'B', 'C'].flatMap((letter) =>
+        ['front', 'middle', 'rear'].map((band) => '100' + letter + '-' + band)),
+    ].sort();
+    expect(Object.keys(daejeonPaths).sort()).toEqual(expected);
+    expect(getVenue('daejeon').sections.map((s) => s.id).sort()).toEqual(expected);
+    expect(new Set(Object.values(daejeonPaths)).size).toBe(expected.length);
   });
 });

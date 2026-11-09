@@ -1,4 +1,6 @@
-export type VenueId = 'kspo' | 'inspire' | 'goyang' | 'worldcup' | 'jamsil' | 'gocheok';
+import daejeonPaths from './daejeonRegions.json';
+
+export type VenueId = 'kspo' | 'inspire' | 'goyang' | 'worldcup' | 'jamsil' | 'gocheok' | 'daejeon';
 export type TicketGrade = 'VIP' | 'R' | 'S' | 'A' | 'BLUE' | 'ORANGE' | 'RED' | 'NAVY' | 'OUTFIELD';
 export type VenueSection = {
   id: string;
@@ -214,6 +216,24 @@ export const VENUES: Venue[] = [
       block('OF1', '외야 1루', 'OUTFIELD', 10000, '외야', 70, 14),
       block('OF3', '외야 3루', 'OUTFIELD', 10000, '외야', 30, 14),
     ],
+  },
+  {
+    id: 'daejeon',
+    name: '대전한화생명볼파크',
+    type: 'baseball',
+    city: '대전 중구',
+    capacity: 20000,
+    standingCapacity: 0,
+    source: '/baseball/daejeon-map.jpg',
+    note: '제공된 좌석도의 각 구역을 독립적으로 선택합니다. 중앙 100A·B·C는 그라운드에서 가까운 순서로 앞·중간·뒤로 구분합니다. 재고와 가격은 연습 설정입니다.',
+    sections: Object.keys(daejeonPaths).map((id) => {
+      const [number, band] = id.split('-');
+      const tiers: Record<string, string> = { front: '앞', middle: '중간', rear: '뒤' };
+      const label = number + '구역' + (band ? ' · ' + tiers[band] : id === '500' ? ' · 잔디석' : '');
+      const outfield = id.startsWith('5');
+      const level = outfield ? '외야' : id.startsWith('S') ? 'S구역' : number[0] + '00번대';
+      return block(id, label, outfield ? 'OUTFIELD' : 'R', outfield ? 10000 : 20000, level, 0, 0);
+    }),
   },
   {
     id: 'gocheok',

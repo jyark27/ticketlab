@@ -1,7 +1,15 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Maximize2, Minus, Plus } from 'lucide-react';
 import type { Venue } from './venues';
 import regions from './baseballRegions.json';
+import daejeonPaths from './daejeonRegions.json';
+
+const daejeon = {
+  width: 1040,
+  height: 1178,
+  blocks: Object.entries(daejeonPaths).map(([id, d]) => ({ id, d, label: id, section: id })),
+};
+
 export default function BaseballDiagram({
   venue,
   selected,
@@ -15,8 +23,12 @@ export default function BaseballDiagram({
 }) {
   const [zoom, setZoom] = useState(1);
   const [selectedBlock, setSelectedBlock] = useState<string>();
-  const map = regions[venue.id === 'gocheok' ? 'gocheok' : 'jamsil'];
+  const isDaejeon = venue.id === 'daejeon';
+  const map = isDaejeon ? daejeon : regions[venue.id === 'gocheok' ? 'gocheok' : 'jamsil'];
   const blocks = map.blocks;
+  const sections = useMemo(() => new Map(venue.sections.map((s) => [s.id, s])), [venue]);
+  const [hoveredSection, setHoveredSection] = useState<string>();
+  const hovered = isDaejeon && hoveredSection ? sections.get(hoveredSection) : undefined;
   const activeBlock = blocks.find(
     (b) => venue.id + ':' + b.id === selectedBlock && b.section === selected,
   );
@@ -58,8 +70,8 @@ export default function BaseballDiagram({
           }}
         >
           <img
-            src={'/baseball/' + venue.id + '-map.png'}
-            alt={venue.name + ' 공식 전체 좌석 배치도'}
+            src={isDaejeon ? venue.source : '/baseball/' + venue.id + '-map.png'}
+            alt={venue.name + ' 전체 좌석 배치도'}
             draggable={false}
           />
           <svg
@@ -68,10 +80,11 @@ export default function BaseballDiagram({
             aria-label={venue.name + ' 구역 선택'}
           >
             {blocks.map((block) => {
-              const s = venue.sections.find((s) => s.id === block.section)!;
-              const active = block.id === activeBlock?.id;
-              const label =
-                block.label === '프리미엄석' ? block.label : block.label + '구역 · ' + s.label;
+              const s = sections.get(block.section)!;
+              const active = isDaejeon ? block.section === selected : block.id === activeBlock?.id;
+              const label = isDaejeon
+                ? s.label
+                : block.label === '프리미엄석' ? block.label : block.label + '구역 · ' + s.label;
               const choose = () => {
                 setSelectedBlock(venue.id + ':' + block.id);
                 onSection(s.id);
@@ -85,6 +98,8 @@ export default function BaseballDiagram({
                   tabIndex={0}
                   aria-label={label + ', 잔여 ' + available(s.id) + '석'}
                   aria-pressed={active}
+                  onPointerEnter={isDaejeon ? () => setHoveredSection(s.id) : undefined}
+                  onPointerLeave={isDaejeon ? () => setHoveredSection(undefined) : undefined}
                   onClick={choose}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter' || e.key === ' ') {
@@ -102,17 +117,17 @@ export default function BaseballDiagram({
       </div>
       <div className="baseball-map-key">
         <b>
-          {activeBlock?.label === '프리미엄석'
+          {isDaejeon ? (hovered ?? current).label : activeBlock?.label === '프리미엄석'
             ? '프리미엄석'
             : (activeBlock ? activeBlock.label + '구역 · ' : '') + current.label}
         </b>
-        <span>잔여 {available(current.id).toLocaleString()}석</span>
+        <span>잔여 {available((hovered ?? current).id).toLocaleString()}석</span>
       </div>
       <div className="map-attribution">
         <a href={venue.source} target="_blank" rel="noreferrer">
-          이미지: {venue.id === 'gocheok' ? '키움히어로즈' : 'LG트윈스'} ↗
+          이미지: {isDaejeon ? '제공된 좌석도' : venue.id === 'gocheok' ? '키움히어로즈' : 'LG트윈스'} ↗
         </a>
-        <span>같은 등급·방향의 좌석은 연습 구역으로 묶입니다</span>
+        {!isDaejeon && <span>같은 등급·방향의 좌석은 연습 구역으로 묶입니다</span>}
       </div>
     </div>
   );

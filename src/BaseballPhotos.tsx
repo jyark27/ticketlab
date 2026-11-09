@@ -16,6 +16,7 @@ const photos: Record<string, [number, string]> = {
 };
 export default function BaseballPhotos({ venue, section }: { venue: Venue; section: string }) {
   const [open, setOpen] = useState(false);
+  if (venue.id === 'daejeon') return null;
   const photo = venue.id === 'gocheok' ? photos[section] : undefined;
   return (
     <div className="seat-photo-disclosure">
